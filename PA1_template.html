@@ -263,6 +263,14 @@ num_NA
 
 <h3>2. Fill all the missing value by the mean for that 5-minute interval</h3>
 
+<p><strong>strategy</strong></p>
+
+<ul>
+<li>add a column to dataframe called &ldquo;steps_revised&rdquo;.</li>
+<li>use mean for 5-minute interval steps as the value in &ldquo;step_revised&rdquo; column if it is missing value in original &ldquo;steps&rdquo; value. Otherwise, copy the steps number to the &ldquo;step_revised&rdquo; column.<br/></li>
+<li>create a new dataset equal to the original one, but replace the original &ldquo;step&rdquo; column&#39;s value by the &ldquo;step_revised&rdquo; column&#39;s value.</li>
+</ul>
+
 <pre><code class="r">data$average_steps &lt;- average_steps
 for (i in seq(nrow(data))) {
     if (is.na(data[i, &quot;steps&quot;])) {

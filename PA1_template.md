@@ -103,6 +103,10 @@ num_NA
 *the total number of missing values in the dataset is 2304.*
 
 ### 2. Fill all the missing value by the mean for that 5-minute interval
+**strategy**
+- add a column to dataframe called "steps_revised".
+- use mean for 5-minute interval steps as the value in "step_revised" column if it is missing value in original "steps" value. Otherwise, copy the steps number to the "step_revised" column.  
+- create a new dataset equal to the original one, but replace the original "step" column's value by the "step_revised" column's value.
 
 ```r
 data$average_steps <- average_steps
