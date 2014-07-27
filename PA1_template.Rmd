@@ -17,7 +17,7 @@ data$interval_time <- strptime(data$interval_revised, format = "%H%M")
 ## Calculate mean total number of steps per day
 ```{r totalsteps}
 s_date <- split(data, data$date_revised)
-total_steps <- sapply(s_date, function(x) sum(x$steps, na.rm = TRUE))
+total_steps <- sapply(s_date, function(x) sum(x$steps))
 ```
 
 ### 1. histogram for total number of steps taken each day
@@ -27,8 +27,8 @@ plot <- hist(total_steps, main = "Total steps per day", xlab ="total number of s
 
 ### 2. Calculate mean and median total number of steps taken per day
 ```{r mean_median_steps}
-mean_steps <- mean(total_steps)
-median_steps <- median(total_steps)
+mean_steps <- mean(total_steps, na.rm = TRUE)
+median_steps <- median(total_steps, na.rm = TRUE)
 mean_steps
 median_steps
 ```
