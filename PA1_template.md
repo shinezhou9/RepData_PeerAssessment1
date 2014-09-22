@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 RepData_Assignment1
 ========================================================
 ## set global options

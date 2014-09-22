@@ -1,9 +1,5 @@
 RepData_Assignment1
 ========================================================
-## set global options
-```{r setoptions,echo=TRUE}
-opts_chunk$set(echo = TRUE)
-```
 ## Loading and preprocessing the data
 
 ```{r readdata}
@@ -22,7 +18,9 @@ total_steps <- sapply(s_date, function(x) sum(x$steps))
 
 ### 1. histogram for total number of steps taken each day
 ```{r hist_totalstep, fig.height=4}
-plot <- hist(total_steps, main = "Total steps per day", xlab ="total number of steps taken each day")
+library(ggplot2)
+qplot(total_steps, geom = "histogram", binwidth = 1000, fill = ..count.., xlab = "Total steps per day", ylab = "Number of Days", main = "Total steps per day Frequency")
+#plot <- hist(total_steps, main = "Total steps per day", xlab ="total number of steps taken each day")
 ```
 
 ### 2. Calculate mean and median total number of steps taken per day
@@ -34,13 +32,16 @@ median_steps
 ```
 
 
-## Average daily activity pattern
+## Average daily activity pattern with Missing data
 
 ### 1. Plot for average daily activity pattern
 ```{r seriesplot_activitypattern, fig.height=4}
 s_pattern <- split(data, data$interval_revised) 
 average_steps <- sapply(s_pattern, function(x) mean(x$steps, na.rm = TRUE))
-plot(data$interval_time[1:288], average_steps, type = "l", col = "blue", main = "Average daily activity pattern", xlab = "interval", ylab = "Number of steps")
+day_pattern <- data.frame(time = data$interval_time[1:288], ave_steps = average_steps)
+p_day <- ggplot(day_pattern, aes(x = time, y = ave_steps))
+p_day+geom_line(colour = "tomato", size = .7)+labs(x = "interval", y = "Number of steps", title = "Average Daily Activity Pattern")
+#plot(data$interval_time[1:288], average_steps, type = "l", col = "blue", main = "Average daily activity pattern", xlab = "interval", ylab = "Number of steps")
 ```
 
 ### 2. Get the most active 5-minute interval
@@ -85,11 +86,12 @@ data_revised <- data.frame(steps = data$steps_revised, date = data$date, interva
 head(data_revised)
 ```
 
-### 4. Make a plot steps taken each day, with missing value filled in,
+### 4. Make a plot steps taken each day, with missing value filled in
 ```{r hist_totalsteps_revised, fig.height=4}
 s_date_revised <- split(data, data$date_revised)
 total_steps_revised <- sapply(s_date_revised, function(x) sum(x$steps_revised, na.rm = TRUE))
-plot <- hist(total_steps_revised, main = "Total steps per day_revised", xlab ="total number of steps taken each day_revised")
+qplot(total_steps_revised, geom = "histogram", binwidth = 1000, fill = ..count.., xlab = "Total steps per day", ylab = "Number of Days", main = "Total steps per day(simulated data)")
+#plot <- hist(total_steps_revised, main = "Total steps per day_revised", xlab ="total number of steps taken each day_revised")
 ```
 
 ### Calculate mean and median total number of steps taken per day. 
@@ -99,7 +101,7 @@ median_steps <- median(total_steps_revised)
 mean_steps
 median_steps
 ```
-*These value differ from the estomate from the first part of the assignment. After we filled in the missing value with the mean steps for that 5-minute interval, the mean and median steps taken per day has increased.*
+*These value almost the same after we filled in the missing value with the mean steps for that 5-minute interval.*
 
 ## Difference in activity patterns between weekdays and weekends?
 ### 1.Create a new factor variable indicating weekday or weekend
@@ -110,7 +112,7 @@ data$day_type[isWeekend(data$date_revised)] <- "weekend"
 data$day_type <- as.factor(data$day_type)
 ```
 
-### 2.plot for average daily activity pattern(Weekdays & Weekend)
+### 2. Calculate average steps of each 5-minutes interval for weekdays and weekend
 ```{r seriesplot_activitypattern_dayType}
 #seperate the weekdays and weekend data into two groups
 s_dayType <- split(data, data$day_type)
@@ -119,15 +121,18 @@ data_weekdays <- s_pattern[["weekdays"]]
 data_weekend <- s_pattern[["weekend"]]
 
 #calculate the weekdays and weekend's average steps for each 5-minutes interval.
-average_steps_weekdays <- sapply(data_weekdays,function(x) mean(x$steps_revised) )
-average_steps_weekend <- sapply(data_weekend,function(x) mean(x$steps_revised) )
-
-#plot the average 5-minutes interval.
-par(mfrow = c(2,1),mar = c(4,4,2,1))
-plot(data$interval_time[1:288], average_steps_weekdays, type = "l", col = "blue", main = "weekdays", xlab = "interval", ylab = "Number of steps")
-plot(data$interval_time[1:288], average_steps_weekend, type = "l", col = "blue", main = "weekend", xlab = "interval", ylab = "Number of steps")
+average_steps_weekdays <- sapply(data_weekdays,function(x) mean(x$steps_revised))
+average_steps_weekend <- sapply(data_weekend,function(x) mean(x$steps_revised))
 ```
 
+### 3.Plot daily activity pattern for weekdays & weekend
 
+```{r, fig.width=8}
+weekdays <- data.frame(time = data$interval_time[1:288], ave_steps = average_steps_weekdays, day = "weekdays")
+weekend <- data.frame(time = data$interval_time[1:288], ave_steps = average_steps_weekend, day = "weekend")
+pattern <- rbind(weekdays, weekend)
+pattern$day <- as.factor(pattern$day)
 
-
+library(ggplot2)
+p <- ggplot(pattern, aes(time, ave_steps,group = day))
+p + geom_line(aes(colour = day), size = .7) + labs(x = "Interval", y="Number of steps", title = "Average daily activity pattern")
