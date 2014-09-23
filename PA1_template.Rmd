@@ -1,6 +1,7 @@
 ---
 output:
   html_document:
+    keep_md: yes
     theme: cerulean
     toc: yes
 ---
@@ -63,11 +64,12 @@ median steps:`r median_steps`.
 
 ###  Plot for average daily activity pattern
 ```{r seriesplot_activitypattern, fig.height=4,fig.width=8}
+library(scales)
 s_pattern <- split(data, data$interval_revised) 
 average_steps <- sapply(s_pattern, function(x) mean(x$steps, na.rm = TRUE))
 day_pattern <- data.frame(time = data$interval_time[1:288], ave_steps = average_steps)
 p_day <- ggplot(day_pattern, aes(x = time, y = ave_steps))
-p_day+geom_line(colour = "tomato", size = .7)+labs(x = "interval", y = "Number of steps", title = "Average Daily Activity Pattern")
+p_day+geom_line(colour = "tomato", size = .7)+labs(x = "interval", y = "Number of steps", title = "Average Daily Activity Pattern")+scale_x_datetime(labels= date_format("%H:%M"))
 #plot(data$interval_time[1:288], average_steps, type = "l", col = "blue", main = "Average daily activity pattern", xlab = "interval", ylab = "Number of steps")
 ```
 
@@ -165,9 +167,11 @@ average_steps_weekend <- sapply(data_weekend,function(x) mean(x$steps_revised))
 weekdays <- data.frame(time = data$interval_time[1:288], ave_steps = average_steps_weekdays, day = "weekdays")
 weekend <- data.frame(time = data$interval_time[1:288], ave_steps = average_steps_weekend, day = "weekend")
 pattern <- rbind(weekdays, weekend)
-pattern$day <- as.factor(pattern$day)
+
 
 
 library(ggplot2)
+library(scales)
 p <- ggplot(pattern, aes(time, ave_steps,group = day))
-p + geom_line(aes(colour = day), size = .7) + labs(x = "Interval", y="Number of steps", title = "Average daily activity pattern")
+p + geom_line(aes(colour = day), size = .7) + labs(x = "Interval", y="Number of steps", title = "Average daily activity pattern")+scale_x_datetime(labels= date_format("%H:%M"))
+
