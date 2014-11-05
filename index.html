@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Daily Acitivity Pattern Analysis  by shinezhou9</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Daily Acitivity Pattern Analysis </h1>
+        <h2> Reproducible Research Project </h2>
+        <a href="https://github.com/shinezhou9/RepData_PeerAssessment1" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="daily-acitivity-pattern-analysis" class="anchor" href="#daily-acitivity-pattern-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Daily Acitivity Pattern Analysis</h1>
+
+<h2>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data</h2>
+
+<ul>
+<li><p>Dataset : <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip">Activity monitoring data</a>
+The variables included in this dataset are:</p></li>
+<li><p>steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)</p></li>
+<li><p>date: The date on which the measurement was taken in YYYY-MM-DD format</p></li>
+<li><p>interval: Identifier for the 5-minute interval in which measurement was taken</p></li>
+</ul>
+
+<p>The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset.</p>
+
+<h2>
+<a id="research-objectives" class="anchor" href="#research-objectives" aria-hidden="true"><span class="octicon octicon-link"></span></a>Research Objectives</h2>
+
+<ul>
+<li>Analyze the daily activity pattern, and compare the result with missing value filled in. </li>
+<li>Explore if there is difference of the daily activity pattern between weekdays and weekend.</li>
+</ul>
+
+<h2>
+<a id="data-processing" class="anchor" href="#data-processing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Processing</h2>
+
+<p>Change the date and interval variable to time format</p>
+
+<div class="highlight highlight-r"><pre><span class="nv">data</span> <span class="o">&lt;-</span> read.csv(<span class="s2">"activity.csv"</span>, <span class="nv">header</span> <span class="o">=</span> <span class="kc">TRUE</span>, <span class="nv">sep</span> <span class="o">=</span> <span class="s2">","</span>)
+<span class="nv">data</span><span class="k">$</span><span class="nv">date_revised</span> <span class="o">&lt;-</span> as.Date(<span class="nv">data</span><span class="k">$</span><span class="nv">date</span>)
+<span class="nv">data</span><span class="k">$</span><span class="nv">interval_revised</span> <span class="o">&lt;-</span> sprintf(<span class="s2">"%04d"</span>, <span class="nv">data</span><span class="k">$</span><span class="nv">interval</span>)
+<span class="nv">data</span><span class="k">$</span><span class="nv">interval_time</span> <span class="o">&lt;-</span> strptime(<span class="nv">data</span><span class="k">$</span><span class="nv">interval_revised</span>, <span class="nv">format</span> <span class="o">=</span> <span class="s2">"%H%M"</span>)</pre></div>
+
+<h2>
+<a id="analyze-daily-activity-pattern-without-missing-data" class="anchor" href="#analyze-daily-activity-pattern-without-missing-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Analyze daily activity pattern without missing data</h2>
+
+<h3>
+<a id="split-data-by-date" class="anchor" href="#split-data-by-date" aria-hidden="true"><span class="octicon octicon-link"></span></a>split data by date</h3>
+
+<div class="highlight highlight-r"><pre><span class="nv">s_date</span> <span class="o">&lt;-</span> split(<span class="nv">data</span>, <span class="nv">data</span><span class="k">$</span><span class="nv">date_revised</span>)
+<span class="nv">total_steps</span> <span class="o">&lt;-</span> sapply(<span class="nv">s_date</span>, <span class="k">function</span>(<span class="nv">x</span>) sum(<span class="nv">x</span><span class="k">$</span><span class="nv">steps</span>))</pre></div>
+
+<h3>
+<a id="make-histogram-for-total-number-of-steps-taken-each-day" class="anchor" href="#make-histogram-for-total-number-of-steps-taken-each-day" aria-hidden="true"><span class="octicon octicon-link"></span></a>Make histogram for total number of steps taken each day</h3>
+
+<div class="highlight highlight-r"><pre>library(<span class="nv">ggplot2</span>)
+qplot(<span class="nv">total_steps</span>, <span class="nv">geom</span> <span class="o">=</span> <span class="s2">"histogram"</span>, <span class="nv">binwidth</span> <span class="o">=</span> <span class="m">1000</span>, <span class="nv">fill</span> <span class="o">=</span> ..<span class="nv">count</span>.., <span class="nv">xlab</span> <span class="o">=</span> <span class="s2">"Total steps per day"</span>, <span class="nv">ylab</span> <span class="o">=</span> <span class="s2">"Number of Days"</span>, <span class="nv">main</span> <span class="o">=</span> <span class="s2">"Total steps per day Frequency"</span>)</pre></div>
+
+<p><img src="./PA1_template_files/figure-html/hist_totalstep.png" alt="plot of chunk hist_totalstep"> </p>
+
+<div class="highlight highlight-r"><pre><span class="c1">#plot &lt;- hist(total_steps, main = "Total steps per day", xlab ="total number of steps taken each day")</span></pre></div>
+
+<h3>
+<a id="calculate-mean-and-median-total-number-of-steps-taken-per-day" class="anchor" href="#calculate-mean-and-median-total-number-of-steps-taken-per-day" aria-hidden="true"><span class="octicon octicon-link"></span></a>Calculate mean and median total number of steps taken per day</h3>
+
+<div class="highlight highlight-r"><pre><span class="nv">mean_steps</span> <span class="o">&lt;-</span> mean(<span class="nv">total_steps</span>, <span class="nv">na.rm</span> <span class="o">=</span> <span class="kc">TRUE</span>)
+<span class="nv">median_steps</span> <span class="o">&lt;-</span> median(<span class="nv">total_steps</span>, <span class="nv">na.rm</span> <span class="o">=</span> <span class="kc">TRUE</span>)
+<span class="nv">mean_steps</span></pre></div>
+
+<pre><code>## [1] 10766
+</code></pre>
+
+<div class="highlight highlight-r"><pre><span class="nv">median_steps</span></pre></div>
+
+<pre><code>## [1] 10765
+</code></pre>
+
+<p><strong>mean and median daily steps with out missing value</strong>
+mean steps:1.0766 × 10<sup>4</sup>
+median steps:10765.</p>
+
+<h3>
+<a id="plot-for-average-daily-activity-pattern" class="anchor" href="#plot-for-average-daily-activity-pattern" aria-hidden="true"><span class="octicon octicon-link"></span></a>Plot for average daily activity pattern</h3>
+
+<div class="highlight highlight-r"><pre>library(<span class="nv">scales</span>)
+<span class="nv">s_pattern</span> <span class="o">&lt;-</span> split(<span class="nv">data</span>, <span class="nv">data</span><span class="k">$</span><span class="nv">interval_revised</span>) 
+<span class="nv">average_steps</span> <span class="o">&lt;-</span> sapply(<span class="nv">s_pattern</span>, <span class="k">function</span>(<span class="nv">x</span>) mean(<span class="nv">x</span><span class="k">$</span><span class="nv">steps</span>, <span class="nv">na.rm</span> <span class="o">=</span> <span class="kc">TRUE</span>))
+<span class="nv">day_pattern</span> <span class="o">&lt;-</span> <span class="kt">data.frame</span>(<span class="nv">time</span> <span class="o">=</span> <span class="nv">data</span><span class="k">$</span><span class="nv">interval_time</span>[<span class="m">1</span><span class="k">:</span><span class="m">288</span>], <span class="nv">ave_steps</span> <span class="o">=</span> <span class="nv">average_steps</span>)
+<span class="nv">p_day</span> <span class="o">&lt;-</span> ggplot(<span class="nv">day_pattern</span>, aes(<span class="nv">x</span> <span class="o">=</span> <span class="nv">time</span>, <span class="nv">y</span> <span class="o">=</span> <span class="nv">ave_steps</span>))
+<span class="nv">p_day</span><span class="o">+</span>geom_line(<span class="nv">colour</span> <span class="o">=</span> <span class="s2">"tomato"</span>, <span class="nv">size</span> <span class="o">=</span> .<span class="m">7</span>)<span class="o">+</span>labs(<span class="nv">x</span> <span class="o">=</span> <span class="s2">"interval"</span>, <span class="nv">y</span> <span class="o">=</span> <span class="s2">"Number of steps"</span>, <span class="nv">title</span> <span class="o">=</span> <span class="s2">"Average Daily Activity Pattern"</span>)<span class="o">+</span>scale_x_datetime(<span class="nv">labels</span><span class="o">=</span> date_format(<span class="s2">"%H:%M"</span>))</pre></div>
+
+<p><img src="./PA1_template_files/figure-html/seriesplot_activitypattern.png" alt="plot of chunk seriesplot_activitypattern"> </p>
+
+<div class="highlight highlight-r"><pre><span class="c1">#plot(data$interval_time[1:288], average_steps, type = "l", col = "blue", main = "Average daily activity pattern", xlab = "interval", ylab = "Number of steps")</span></pre></div>
+
+<h3>
+<a id="get-the-most-active-5-minute-interval" class="anchor" href="#get-the-most-active-5-minute-interval" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get the most active 5-minute interval</h3>
+
+<div class="highlight highlight-r"><pre><span class="nv">max_index</span> <span class="o">&lt;-</span> which(<span class="nv">average_steps</span> <span class="o">==</span> max(<span class="nv">average_steps</span>))
+<span class="nv">max_interval</span> <span class="o">&lt;-</span> <span class="nv">data</span><span class="k">$</span><span class="nv">interval_revised</span>[<span class="nv">max_index</span>]
+<span class="nv">max_interval</span></pre></div>
+
+<pre><code>## [1] "0835"
+</code></pre>
+
+<p><strong>Most avtive 5-minute interval</strong> 0835 on average across all the days in the dataset, contains the maximum number of steps.</p>
+
+<h2>
+<a id="explore-daily-activity-pattern-with-missing-data" class="anchor" href="#explore-daily-activity-pattern-with-missing-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Explore daily activity pattern with Missing data</h2>
+
+<h3>
+<a id="imputing-missing-valuse" class="anchor" href="#imputing-missing-valuse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Imputing missing valuse</h3>
+
+<p>Calculate and report total number of missing values in the dataset. </p>
+
+<div class="highlight highlight-r"><pre><span class="nv">bad</span> <span class="o">&lt;-</span> is.na(<span class="nv">data</span><span class="k">$</span><span class="nv">steps</span>)
+<span class="nv">num_NA</span> <span class="o">&lt;-</span> length(<span class="nv">data</span><span class="k">$</span><span class="nv">steps</span>[<span class="nv">bad</span>])
+<span class="nv">num_NA</span></pre></div>
+
+<pre><code>## [1] 2304
+</code></pre>
+
+<p><strong>Total number of missing values of steps</strong>:  2304</p>
+
+<p>Fill all the missing value by the mean for that 5-minute interval</p>
+
+<p><strong>strategy</strong></p>
+
+<ul>
+<li>add a column to dataframe called "steps_revised".</li>
+<li>use mean for 5-minute interval steps as the value in "step_revised" column if it is missing value in original "steps" value. Otherwise, copy the steps number to the "step_revised" column.<br>
+</li>
+<li>create a new dataset equal to the original one, but replace the original "step" column's value by the "step_revised" column's value.</li>
+</ul>
+
+<div class="highlight highlight-r"><pre><span class="nv">data</span><span class="k">$</span><span class="nv">average_steps</span> <span class="o">&lt;-</span> <span class="nv">average_steps</span>
+<span class="k">for</span> (<span class="nv">i</span> <span class="k">in</span> seq(nrow(<span class="nv">data</span>))) {
+        <span class="k">if</span> (is.na(<span class="nv">data</span>[<span class="nv">i</span>, <span class="s2">"steps"</span>])) {
+                <span class="nv">data</span><span class="k">$</span><span class="nv">steps_revised</span>[<span class="nv">i</span>] <span class="o">&lt;-</span> <span class="nv">data</span>[<span class="nv">i</span>, <span class="s2">"average_steps"</span>]
+        }
+        <span class="k">else</span> {
+                <span class="nv">data</span><span class="k">$</span><span class="nv">steps_revised</span>[<span class="nv">i</span>] <span class="o">&lt;-</span> <span class="nv">data</span>[<span class="nv">i</span>, <span class="s2">"steps"</span>]
+        }
+}</pre></div>
+
+<p>Create a new dataset with missing data filled in. </p>
+
+<div class="highlight highlight-r"><pre><span class="nv">data_revised</span> <span class="o">&lt;-</span> <span class="kt">data.frame</span>(<span class="nv">steps</span> <span class="o">=</span> <span class="nv">data</span><span class="k">$</span><span class="nv">steps_revised</span>, <span class="nv">date</span> <span class="o">=</span> <span class="nv">data</span><span class="k">$</span><span class="nv">date</span>, <span class="nv">interval</span> <span class="o">=</span> <span class="nv">data</span><span class="k">$</span><span class="nv">interval</span>)
+head(<span class="nv">data_revised</span>)</pre></div>
+
+<pre><code>##     steps       date interval
+## 1 1.71698 2012-10-01        0
+## 2 0.33962 2012-10-01        5
+## 3 0.13208 2012-10-01       10
+## 4 0.15094 2012-10-01       15
+## 5 0.07547 2012-10-01       20
+## 6 2.09434 2012-10-01       25
+</code></pre>
+
+<h3>
+<a id="plot-steps-taken-each-day-with-missing-value-filled-in" class="anchor" href="#plot-steps-taken-each-day-with-missing-value-filled-in" aria-hidden="true"><span class="octicon octicon-link"></span></a>Plot steps taken each day, with missing value filled in</h3>
+
+<div class="highlight highlight-r"><pre><span class="nv">s_date_revised</span> <span class="o">&lt;-</span> split(<span class="nv">data</span>, <span class="nv">data</span><span class="k">$</span><span class="nv">date_revised</span>)
+<span class="nv">total_steps_revised</span> <span class="o">&lt;-</span> sapply(<span class="nv">s_date_revised</span>, <span class="k">function</span>(<span class="nv">x</span>) sum(<span class="nv">x</span><span class="k">$</span><span class="nv">steps_revised</span>, <span class="nv">na.rm</span> <span class="o">=</span> <span class="kc">TRUE</span>))
+qplot(<span class="nv">total_steps_revised</span>, <span class="nv">geom</span> <span class="o">=</span> <span class="s2">"histogram"</span>, <span class="nv">binwidth</span> <span class="o">=</span> <span class="m">1000</span>, <span class="nv">fill</span> <span class="o">=</span> ..<span class="nv">count</span>.., <span class="nv">xlab</span> <span class="o">=</span> <span class="s2">"Total steps per day"</span>, <span class="nv">ylab</span> <span class="o">=</span> <span class="s2">"Number of Days"</span>, <span class="nv">main</span> <span class="o">=</span> <span class="s2">"Total steps per day(simulated data)"</span>)</pre></div>
+
+<p><img src="./PA1_template_files/figure-html/hist_totalsteps_revised.png" alt="plot of chunk hist_totalsteps_revised"> </p>
+
+<div class="highlight highlight-r"><pre><span class="c1">#plot &lt;- hist(total_steps_revised, main = "Total steps per day_revised", xlab ="total number of steps taken each day_revised")</span></pre></div>
+
+<h3>
+<a id="calculate-mean-and-median-total-number-of-steps-taken-per-day-1" class="anchor" href="#calculate-mean-and-median-total-number-of-steps-taken-per-day-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Calculate mean and median total number of steps taken per day.</h3>
+
+<div class="highlight highlight-r"><pre><span class="nv">mean_steps</span> <span class="o">&lt;-</span> mean(<span class="nv">total_steps_revised</span>)
+<span class="nv">median_steps</span> <span class="o">&lt;-</span> median(<span class="nv">total_steps_revised</span>)
+<span class="nv">mean_steps</span></pre></div>
+
+<pre><code>## [1] 10766
+</code></pre>
+
+<div class="highlight highlight-r"><pre><span class="nv">median_steps</span></pre></div>
+
+<pre><code>## [1] 10766
+</code></pre>
+
+<p><strong>mean and median steps,with missiong value filled in</strong>
+mean steps:1.0766 × 10<sup>4</sup>
+median steps: 1.0766 × 10<sup>4</sup>.</p>
+
+<p><strong>Conclusion:</strong> Mean and median value almost the same after we filled in the missing value with the mean steps for that 5-minute interval. Which means missing values don not have big impact on the research result**</p>
+
+<h2>
+<a id="compare-activity-patterns-between-weekdays-and-weekends" class="anchor" href="#compare-activity-patterns-between-weekdays-and-weekends" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compare activity patterns between weekdays and weekends</h2>
+
+<h3>
+<a id="create-a-new-factor-variable-indicating-weekday-or-weekend" class="anchor" href="#create-a-new-factor-variable-indicating-weekday-or-weekend" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create a new factor variable indicating weekday or weekend</h3>
+
+<div class="highlight highlight-r"><pre>library(<span class="nv">timeDate</span>)
+<span class="nv">data</span><span class="k">$</span><span class="nv">day_type</span> <span class="o">&lt;-</span> <span class="s2">"weekdays"</span>
+<span class="nv">data</span><span class="k">$</span><span class="nv">day_type</span>[isWeekend(<span class="nv">data</span><span class="k">$</span><span class="nv">date_revised</span>)] <span class="o">&lt;-</span> <span class="s2">"weekend"</span>
+<span class="nv">data</span><span class="k">$</span><span class="nv">day_type</span> <span class="o">&lt;-</span> as.factor(<span class="nv">data</span><span class="k">$</span><span class="nv">day_type</span>)</pre></div>
+
+<h3>
+<a id="calculate-average-steps-of-each-5-minutes-interval-for-weekdays-and-weekend" class="anchor" href="#calculate-average-steps-of-each-5-minutes-interval-for-weekdays-and-weekend" aria-hidden="true"><span class="octicon octicon-link"></span></a>Calculate average steps of each 5-minutes interval for weekdays and weekend</h3>
+
+<div class="highlight highlight-r"><pre><span class="c1">#seperate the weekdays and weekend data into two groups</span>
+<span class="nv">s_dayType</span> <span class="o">&lt;-</span> split(<span class="nv">data</span>, <span class="nv">data</span><span class="k">$</span><span class="nv">day_type</span>)
+<span class="nv">s_pattern</span> <span class="o">&lt;-</span> lapply(<span class="nv">s_dayType</span>, <span class="k">function</span>(<span class="nv">x</span>) split(<span class="nv">x</span>, <span class="nv">x</span><span class="k">$</span><span class="nv">interval_revised</span>))
+<span class="nv">data_weekdays</span> <span class="o">&lt;-</span> <span class="nv">s_pattern</span>[[<span class="s2">"weekdays"</span>]]
+<span class="nv">data_weekend</span> <span class="o">&lt;-</span> <span class="nv">s_pattern</span>[[<span class="s2">"weekend"</span>]]
+
+<span class="c1">#calculate the weekdays and weekend's average steps for each 5-minutes interval.</span>
+<span class="nv">average_steps_weekdays</span> <span class="o">&lt;-</span> sapply(<span class="nv">data_weekdays</span>,<span class="k">function</span>(<span class="nv">x</span>) mean(<span class="nv">x</span><span class="k">$</span><span class="nv">steps_revised</span>))
+<span class="nv">average_steps_weekend</span> <span class="o">&lt;-</span> sapply(<span class="nv">data_weekend</span>,<span class="k">function</span>(<span class="nv">x</span>) mean(<span class="nv">x</span><span class="k">$</span><span class="nv">steps_revised</span>))</pre></div>
+
+<h3>
+<a id="plot-activity-pattern-for-weekdays--weekend" class="anchor" href="#plot-activity-pattern-for-weekdays--weekend" aria-hidden="true"><span class="octicon octicon-link"></span></a>Plot activity pattern for weekdays &amp; weekend</h3>
+
+<div class="highlight highlight-r"><pre><span class="nv">weekdays</span> <span class="o">&lt;-</span> <span class="kt">data.frame</span>(<span class="nv">time</span> <span class="o">=</span> <span class="nv">data</span><span class="k">$</span><span class="nv">interval_time</span>[<span class="m">1</span><span class="k">:</span><span class="m">288</span>], <span class="nv">ave_steps</span> <span class="o">=</span> <span class="nv">average_steps_weekdays</span>, <span class="nv">day</span> <span class="o">=</span> <span class="s2">"weekdays"</span>)
+<span class="nv">weekend</span> <span class="o">&lt;-</span> <span class="kt">data.frame</span>(<span class="nv">time</span> <span class="o">=</span> <span class="nv">data</span><span class="k">$</span><span class="nv">interval_time</span>[<span class="m">1</span><span class="k">:</span><span class="m">288</span>], <span class="nv">ave_steps</span> <span class="o">=</span> <span class="nv">average_steps_weekend</span>, <span class="nv">day</span> <span class="o">=</span> <span class="s2">"weekend"</span>)
+<span class="nv">pattern</span> <span class="o">&lt;-</span> rbind(<span class="nv">weekdays</span>, <span class="nv">weekend</span>)
+
+
+
+library(<span class="nv">ggplot2</span>)
+library(<span class="nv">scales</span>)
+<span class="nv">p</span> <span class="o">&lt;-</span> ggplot(<span class="nv">pattern</span>, aes(<span class="nv">time</span>, <span class="nv">ave_steps</span>,<span class="nv">group</span> <span class="o">=</span> <span class="nv">day</span>))
+<span class="nv">p</span> <span class="o">+</span> geom_line(aes(<span class="nv">colour</span> <span class="o">=</span> <span class="nv">day</span>), <span class="nv">size</span> <span class="o">=</span> .<span class="m">7</span>) <span class="o">+</span> labs(<span class="nv">x</span> <span class="o">=</span> <span class="s2">"Interval"</span>, <span class="nv">y</span><span class="o">=</span><span class="s2">"Number of steps"</span>, <span class="nv">title</span> <span class="o">=</span> <span class="s2">"Average daily activity pattern"</span>)<span class="o">+</span>scale_x_datetime(<span class="nv">labels</span><span class="o">=</span> date_format(<span class="s2">"%H:%M"</span>))</pre></div>
+
+<p><img src="./PA1_template_files/figure-html/unnamed-chunk-1.png" alt="plot of chunk unnamed-chunk-1"> </p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/shinezhou9/RepData_PeerAssessment1/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/shinezhou9/RepData_PeerAssessment1/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/shinezhou9/RepData_PeerAssessment1"></a> is maintained by <a href="https://github.com/shinezhou9">shinezhou9</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
